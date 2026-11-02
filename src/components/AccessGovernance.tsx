@@ -288,7 +288,7 @@ export const AccessGovernance: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-emerald-950/40 transition cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Add Custom Role</span>
+            <span>Add Custom Role</span>
           </button>
         </div>
       </div>
