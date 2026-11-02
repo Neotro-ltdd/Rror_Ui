@@ -8,10 +8,23 @@ class SignalRService {
   public startConnection(onConnected?: () => void) {
     if (this.connection) return;
 
+    const backendBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+    const hubUrl = `${backendBase}/hubs/telemetry`;
+
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('/hubs/telemetry', {
+      .withUrl(hubUrl, {
         skipNegotiation: false,
-        transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling
+        transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
+        accessTokenFactory: () => {
+          try {
+            const rawUser = localStorage.getItem('rorr_user');
+            if (rawUser) {
+              const user = JSON.parse(rawUser);
+              return user?.token || '';
+            }
+          } catch { }
+          return '';
+        }
       })
       .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
       .configureLogging(signalR.LogLevel.Warning)

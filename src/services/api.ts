@@ -1,7 +1,8 @@
 import axios from 'axios';
 import type { AiExplanationResponse, ApiResponse, LogStats, PaginatedResult, Project, ProjectMember, RorrLog, User, UserRole } from '../types/rorr';
 
-const API_BASE = '/api/v1';
+const BACKEND_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+const API_BASE = `${BACKEND_BASE}/api/v1`;
 
 export const api = axios.create({
   baseURL: API_BASE,
