@@ -56,6 +56,41 @@ export interface User {
   mustChangePassword?: boolean;
   assignedProjects?: string[];
   token?: string;
+  roleId?: string;
+  roleName?: string;
+  permissions?: string[];
+}
+
+export interface RoleItem {
+  id: string;
+  name: string;
+  description?: string;
+  isSystem: boolean;
+  userCount: number;
+  permissionCount: number;
+  createdAtUtc: string;
+}
+
+export interface PermissionCatalogItem {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  category: string;
+}
+
+export interface PermissionCategoryGroup {
+  category: string;
+  permissions: PermissionCatalogItem[];
+}
+
+export interface RoleDetail {
+  id: string;
+  name: string;
+  description?: string;
+  isSystem: boolean;
+  userCount: number;
+  assignedPermissionCodes: string[];
 }
 
 export interface LoginResult {

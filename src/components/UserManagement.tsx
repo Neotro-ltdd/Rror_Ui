@@ -14,8 +14,8 @@ import {
   UserPlus,
   Users
 } from 'lucide-react';
-import { createUser, deleteUser, getProjects, getUsers, resendInvite, toggleUserStatus } from '../services/api';
-import type { Project, User, UserRole } from '../types/rorr';
+import { createUser, deleteUser, getProjects, getRoles, getUsers, resendInvite, toggleUserStatus } from '../services/api';
+import type { Project, RoleItem, User, UserRole } from '../types/rorr';
 import { ConfirmModal } from './ConfirmModal';
 
 export const UserManagement: React.FC = () => {
@@ -42,20 +42,31 @@ export const UserManagement: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [fullName, setFullName] = useState<string>('');
   const [role, setRole] = useState<UserRole>('Engineer');
+  const [rolesList, setRolesList] = useState<RoleItem[]>([]);
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [usersData, projectsData] = await Promise.all([getUsers(), getProjects()]);
+      const [usersData, projectsData, rolesData] = await Promise.all([
+        getUsers(),
+        getProjects(),
+        getRoles().catch(() => [] as RoleItem[])
+      ]);
       setUsers(usersData);
       setProjects(projectsData);
+      setRolesList(rolesData);
+      if (rolesData.length > 0 && !selectedRoleId) {
+        const engRole = rolesData.find(r => r.name.toLowerCase() === 'engineer') || rolesData[0];
+        setSelectedRoleId(engRole.id);
+      }
     } catch (err) {
       console.error('Failed to load user management data:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedRoleId]);
 
   useEffect(() => {
     fetchData();
@@ -84,6 +95,7 @@ export const UserManagement: React.FC = () => {
         email: email.trim(),
         fullName: fullName.trim() || username.trim(),
         role,
+        roleId: selectedRoleId || undefined,
         projectIds: selectedProjectIds,
       });
 
@@ -94,6 +106,10 @@ export const UserManagement: React.FC = () => {
       setEmail('');
       setFullName('');
       setRole('Engineer');
+      if (rolesList.length > 0) {
+        const engRole = rolesList.find(r => r.name.toLowerCase() === 'engineer') || rolesList[0];
+        setSelectedRoleId(engRole.id);
+      }
       setSelectedProjectIds([]);
       fetchData();
     } catch (err: any) {
@@ -338,7 +354,7 @@ export const UserManagement: React.FC = () => {
                         }`}
                       >
                         <ShieldCheck className="w-3 h-3" />
-                        {user.role}
+                        {user.roleName || user.role}
                       </span>
                     </td>
 
@@ -506,15 +522,35 @@ export const UserManagement: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">User Role</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Assigned Role</label>
                   <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value as UserRole)}
+                    value={selectedRoleId || ''}
+                    onChange={(e) => {
+                      const rId = e.target.value;
+                      setSelectedRoleId(rId);
+                      const found = rolesList.find((r) => r.id === rId);
+                      if (found) {
+                        const lower = found.name.toLowerCase();
+                        if (lower === 'admin') setRole('Admin');
+                        else if (lower === 'viewer') setRole('Viewer');
+                        else setRole('Engineer');
+                      }
+                    }}
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500"
                   >
-                    <option value="Engineer">Engineer (Diagnostics &amp; Resolving)</option>
-                    <option value="Admin">Admin (Full Control &amp; Provisioning)</option>
-                    <option value="Viewer">Viewer (Read-Only Telemetry)</option>
+                    {rolesList.length > 0 ? (
+                      rolesList.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.name} {r.isSystem ? `(System - ${r.permissionCount} perms)` : `(Custom - ${r.permissionCount} perms)`}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Engineer">Engineer (Diagnostics &amp; Resolving)</option>
+                        <option value="Admin">Admin (Full Control &amp; Provisioning)</option>
+                        <option value="Viewer">Viewer (Read-Only Telemetry)</option>
+                      </>
+                    )}
                   </select>
                 </div>
               </div>

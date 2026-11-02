@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { ShieldAlert } from 'lucide-react';
+import { AccessGovernance } from './components/AccessGovernance';
 import { AiChatbot } from './components/AiChatbot';
 import { DeveloperDocs } from './components/DeveloperDocs';
 import { IncidentModal } from './components/IncidentModal';
@@ -46,6 +48,12 @@ export function App() {
   const [selectedLog, setSelectedLog] = useState<RorrLog | null>(null);
   const [stats, setStats] = useState<LogStats | null>(null);
   const [revocationMessage, setRevocationMessage] = useState<string | null>(null);
+
+  const isAdmin = currentUser?.role === 'Admin' || currentUser?.roleName?.toLowerCase() === 'admin';
+  const permissions = currentUser?.permissions || [];
+  const canViewUsers = isAdmin || permissions.includes('users.view');
+  const canManageRoles = isAdmin || permissions.includes('roles.manage');
+  const canManageProjects = isAdmin || permissions.includes('projects.create') || permissions.includes('projects.manage_keys');
 
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
@@ -269,10 +277,52 @@ export function App() {
           {activeTab === 'docs' && <DeveloperDocs />}
 
           {activeTab === 'projects' && (
-            <ProjectManager projects={projects} onProjectCreated={fetchProjects} />
+            canManageProjects ? (
+              <ProjectManager projects={projects} onProjectCreated={fetchProjects} />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-950">
+                <div className="w-16 h-16 rounded-2xl bg-rose-950/40 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-xl">
+                  <ShieldAlert className="w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">Access Restricted</h2>
+                <p className="text-xs text-slate-400 max-w-md font-mono">
+                  Your role does not have permission to register new projects or manage project API keys.
+                </p>
+              </div>
+            )
           )}
 
-          {activeTab === 'users' && <UserManagement />}
+          {activeTab === 'users' && (
+            canViewUsers ? (
+              <UserManagement />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-950">
+                <div className="w-16 h-16 rounded-2xl bg-rose-950/40 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-xl">
+                  <ShieldAlert className="w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">Access Restricted</h2>
+                <p className="text-xs text-slate-400 max-w-md font-mono">
+                  Your account does not have permission to view or manage system users. Contact your administrator to request access.
+                </p>
+              </div>
+            )
+          )}
+
+          {activeTab === 'governance' && (
+            canManageRoles ? (
+              <AccessGovernance />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-950">
+                <div className="w-16 h-16 rounded-2xl bg-rose-950/40 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-xl">
+                  <ShieldAlert className="w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-bold text-white mb-2">Access Restricted</h2>
+                <p className="text-xs text-slate-400 max-w-md font-mono">
+                  Your account does not have permission to configure access governance and system roles.
+                </p>
+              </div>
+            )
+          )}
 
           {activeTab === 'manual' && <UserManual />}
         </main>

@@ -1,8 +1,8 @@
 import React from 'react';
-import { BarChart3, BookOpen, Code2, FolderKanban, LogOut, PlaySquare, Radio, Shield, Users, X } from 'lucide-react';
+import { BarChart3, BookOpen, Code2, FolderKanban, KeyRound, LogOut, PlaySquare, Radio, Shield, Users, X } from 'lucide-react';
 import type { User } from '../types/rorr';
 
-export type NavTab = 'metrics' | 'stream' | 'simulator' | 'docs' | 'projects' | 'users' | 'manual';
+export type NavTab = 'metrics' | 'stream' | 'simulator' | 'docs' | 'projects' | 'users' | 'governance' | 'manual';
 
 interface Props {
   isOpen: boolean;
@@ -14,15 +14,22 @@ interface Props {
 }
 
 export const Sidebar: React.FC<Props> = ({ isOpen, onClose, activeTab, onTabChange, currentUser, onLogout }) => {
-  const navItems = [
-    { id: 'metrics', label: 'Analytics & Metrics', icon: BarChart3 },
-    { id: 'stream', label: 'Live Explorer', icon: Radio },
-    { id: 'simulator', label: 'Payload Simulator', icon: PlaySquare },
-    { id: 'docs', label: 'Integration SDKs', icon: Code2 },
-    { id: 'projects', label: 'Project Keys', icon: FolderKanban },
-    { id: 'users', label: 'User Management', icon: Users },
-    { id: 'manual', label: 'User Manual & Docs', icon: BookOpen },
-  ] as const;
+  const isAdmin = currentUser?.role === 'Admin' || currentUser?.roleName?.toLowerCase() === 'admin';
+  const permissions = currentUser?.permissions || [];
+  const hasPerm = (code: string) => isAdmin || permissions.includes(code);
+
+  const rawNavItems: { id: NavTab; label: string; icon: React.ComponentType<{ className?: string }>; visible: boolean }[] = [
+    { id: 'metrics', label: 'Analytics & Metrics', icon: BarChart3, visible: true },
+    { id: 'stream', label: 'Live Explorer', icon: Radio, visible: true },
+    { id: 'simulator', label: 'Payload Simulator', icon: PlaySquare, visible: true },
+    { id: 'docs', label: 'Integration SDKs', icon: Code2, visible: true },
+    { id: 'projects', label: 'Project Keys', icon: FolderKanban, visible: hasPerm('projects.create') || hasPerm('projects.manage_keys') },
+    { id: 'users', label: 'User Management', icon: Users, visible: hasPerm('users.view') },
+    { id: 'governance', label: 'Access Governance', icon: KeyRound, visible: hasPerm('roles.manage') },
+    { id: 'manual', label: 'User Manual & Docs', icon: BookOpen, visible: true },
+  ];
+
+  const navItems = rawNavItems.filter((item) => item.visible);
 
   const handleSelectTab = (tab: NavTab) => {
     onTabChange(tab);

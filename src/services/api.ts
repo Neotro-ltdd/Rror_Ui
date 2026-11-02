@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AiExplanationResponse, ApiResponse, LogStats, PaginatedResult, Project, ProjectMember, RorrLog, User, UserRole } from '../types/rorr';
+import type { AiExplanationResponse, ApiResponse, LogStats, PaginatedResult, PermissionCategoryGroup, Project, ProjectMember, RoleDetail, RoleItem, RorrLog, User, UserRole } from '../types/rorr';
 
 const BACKEND_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const API_BASE = `${BACKEND_BASE}/api/v1`;
@@ -123,6 +123,7 @@ export const createUser = async (data: {
   email: string;
   fullName: string;
   role: UserRole;
+  roleId?: string;
   projectIds?: string[];
 }): Promise<User> => {
   const res = await api.post<ApiResponse<User>>('/users', data);
@@ -143,6 +144,37 @@ export const toggleUserStatus = async (userId: string, isActive: boolean): Promi
 
 export const deleteUser = async (id: string): Promise<void> => {
   await api.delete(`/users/${id}`);
+};
+
+// Roles & Access Governance API
+export const getRoles = async (): Promise<RoleItem[]> => {
+  const res = await api.get<ApiResponse<RoleItem[]>>('/roles');
+  return res.data.data;
+};
+
+export const getPermissionsCatalog = async (): Promise<PermissionCategoryGroup[]> => {
+  const res = await api.get<ApiResponse<PermissionCategoryGroup[]>>('/roles/permissions');
+  return res.data.data;
+};
+
+export const getRolePermissions = async (roleId: string): Promise<RoleDetail> => {
+  const res = await api.get<ApiResponse<RoleDetail>>(`/roles/${roleId}/permissions`);
+  return res.data.data;
+};
+
+export const updateRolePermissions = async (roleId: string, permissionCodes: string[]): Promise<string> => {
+  const res = await api.put<ApiResponse<object>>(`/roles/${roleId}/permissions`, { permissionCodes });
+  return res.data.message;
+};
+
+export const createCustomRole = async (data: { name: string; description?: string; permissionCodes?: string[] }): Promise<RoleItem> => {
+  const res = await api.post<ApiResponse<RoleItem>>('/roles', data);
+  return res.data.data;
+};
+
+export const deleteCustomRole = async (roleId: string): Promise<string> => {
+  const res = await api.delete<ApiResponse<object>>(`/roles/${roleId}`);
+  return res.data.message;
 };
 
 export interface LoginResultData {
