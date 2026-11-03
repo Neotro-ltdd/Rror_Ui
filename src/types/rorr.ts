@@ -65,9 +65,13 @@ export interface RoleItem {
   id: string;
   name: string;
   description?: string;
-  isSystem: boolean;
-  userCount: number;
-  permissionCount: number;
+  isSystem?: boolean;
+  isSystemRole?: boolean;
+  userCount?: number;
+  usersCount?: number;
+  permissionCount?: number;
+  permissionsCount?: number;
+  permissionCodes?: string[];
   createdAtUtc: string;
 }
 
@@ -88,8 +92,11 @@ export interface RoleDetail {
   id: string;
   name: string;
   description?: string;
-  isSystem: boolean;
-  userCount: number;
+  isSystem?: boolean;
+  isSystemRole?: boolean;
+  userCount?: number;
+  usersCount?: number;
+  permissionCodes?: string[];
   assignedPermissionCodes: string[];
 }
 

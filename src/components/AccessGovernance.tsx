@@ -87,16 +87,46 @@ export const AccessGovernance: React.FC = () => {
     setDetailLoading(true);
     setErrorMsg(null);
     try {
-      const detail = await getRolePermissions(roleId);
-      setRoleDetail(detail);
-      setActivePermissions(new Set(detail.assignedPermissionCodes));
+      const selectedRole = roles.find((r) => r.id === roleId);
+      const detailRes = await getRolePermissions(roleId);
+
+      let codes: string[] = [];
+      let isSystem = Boolean(selectedRole?.isSystem ?? selectedRole?.isSystemRole);
+      let name = selectedRole?.name || 'Role';
+      let description = selectedRole?.description;
+      let userCount = selectedRole?.userCount ?? selectedRole?.usersCount ?? 0;
+
+      if (Array.isArray(detailRes)) {
+        codes = detailRes;
+      } else if (detailRes && typeof detailRes === 'object') {
+        const rawObj = detailRes as any;
+        codes = rawObj.permissionCodes || rawObj.assignedPermissionCodes || [];
+        if (rawObj.isSystem !== undefined || rawObj.isSystemRole !== undefined) {
+          isSystem = Boolean(rawObj.isSystem ?? rawObj.isSystemRole);
+        }
+        if (rawObj.name) name = rawObj.name;
+        if (rawObj.description !== undefined) description = rawObj.description;
+        if (rawObj.userCount !== undefined || rawObj.usersCount !== undefined) {
+          userCount = rawObj.userCount ?? rawObj.usersCount;
+        }
+      }
+
+      setRoleDetail({
+        id: roleId,
+        name,
+        description,
+        isSystem,
+        userCount,
+        assignedPermissionCodes: codes
+      });
+      setActivePermissions(new Set(codes));
     } catch (err: any) {
       console.error('Failed to fetch role permissions:', err);
       setErrorMsg(err?.response?.data?.message || 'Failed to fetch permissions for the selected role.');
     } finally {
       setDetailLoading(false);
     }
-  }, []);
+  }, [roles]);
 
   useEffect(() => {
     if (selectedRoleId) {
@@ -193,7 +223,11 @@ export const AccessGovernance: React.FC = () => {
       let initialCodes: string[] = [];
       if (templateRoleId) {
         const templateDetail = await getRolePermissions(templateRoleId);
-        initialCodes = templateDetail.assignedPermissionCodes;
+        if (Array.isArray(templateDetail)) {
+          initialCodes = templateDetail;
+        } else if (templateDetail && typeof templateDetail === 'object') {
+          initialCodes = (templateDetail as any).permissionCodes || (templateDetail as any).assignedPermissionCodes || [];
+        }
       }
 
       const created = await createCustomRole({
@@ -327,6 +361,8 @@ export const AccessGovernance: React.FC = () => {
         ) : (
           roles.map((r) => {
             const isSelected = r.id === selectedRoleId;
+            const uCount = r.userCount ?? r.usersCount ?? 0;
+            const pCount = r.permissionCount ?? r.permissionsCount ?? (r.permissionCodes?.length ?? 0);
             return (
               <button
                 key={r.id}
@@ -348,10 +384,10 @@ export const AccessGovernance: React.FC = () => {
                     isSelected ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'
                   }`}
                 >
-                  {r.userCount} {r.userCount === 1 ? 'user' : 'users'}
+                  {uCount} {uCount === 1 ? 'user' : 'users'}
                 </span>
                 <span className="text-[10px] text-slate-500 font-mono">
-                  &bull; {r.permissionCount} perms
+                  &bull; {pCount} perms
                 </span>
               </button>
             );

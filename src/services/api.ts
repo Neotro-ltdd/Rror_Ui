@@ -157,8 +157,8 @@ export const getPermissionsCatalog = async (): Promise<PermissionCategoryGroup[]
   return res.data.data;
 };
 
-export const getRolePermissions = async (roleId: string): Promise<RoleDetail> => {
-  const res = await api.get<ApiResponse<RoleDetail>>(`/roles/${roleId}/permissions`);
+export const getRolePermissions = async (roleId: string): Promise<RoleDetail | string[]> => {
+  const res = await api.get<ApiResponse<RoleDetail | string[]>>(`/roles/${roleId}/permissions`);
   return res.data.data;
 };
 
