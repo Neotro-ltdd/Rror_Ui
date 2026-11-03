@@ -42,13 +42,23 @@ export const onSessionRevoked = (callback: SessionRevokedCallback) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      const msg = error.response.data?.message || 'Access revoked: Your account is no longer active in the system.';
-      // Only fire session revocation for authenticated background calls (not initial login failures)
-      if (error.config?.url && !error.config.url.includes('/auth/login') && !error.config.url.includes('/auth/verify-otp')) {
-        sessionRevokedListeners.forEach((cb) => cb(msg));
+    if (error.response) {
+      const status = error.response.status;
+      const url = error.config?.url || '';
+      const isAuthCall = url.includes('/auth/login') || url.includes('/auth/verify-otp') || url.includes('/auth/set-password');
+
+      if (!isAuthCall) {
+        if (status === 401) {
+          // Token expired naturally due to session inactivity
+          sessionRevokedListeners.forEach((cb) => cb('Your session has expired. Please sign in again.'));
+        } else if (status === 403) {
+          // Explicit authorization rejection or account deactivation
+          const msg = error.response.data?.message || 'Access revoked: Your account is no longer active in the system.';
+          sessionRevokedListeners.forEach((cb) => cb(msg));
+        }
       }
     }
+    // Transient network drops, timeouts, or 502/503 server restarts are NOT treated as session revocations
     return Promise.reject(error);
   }
 );

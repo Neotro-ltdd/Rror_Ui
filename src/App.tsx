@@ -83,21 +83,23 @@ export function App() {
     const checkSession = async () => {
       try {
         const res = await validateSession(currentUser.id);
-        if (!res.isActive && isMounted) {
+        if (res && res.isActive === false && isMounted) {
           setRevocationMessage('Access has been revoked. Your account is no longer active in the system.');
           handleLogout();
         }
       } catch (err: any) {
-        if (isMounted) {
-          const msg = err?.response?.data?.message || 'Access revoked: Account removed from system.';
+        // Only trigger logout if server explicitly answered with 403 Forbidden (account deactivated)
+        if (isMounted && err?.response?.status === 403) {
+          const msg = err.response.data?.message || 'Access revoked: Your account is no longer active in the system.';
           setRevocationMessage(msg);
           handleLogout();
         }
+        // Transient network drops, timeouts, or server sleep are safely ignored
       }
     };
 
     checkSession();
-    const interval = setInterval(checkSession, 30000);
+    const interval = setInterval(checkSession, 60000);
     return () => {
       isMounted = false;
       clearInterval(interval);
