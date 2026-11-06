@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Activity,
   ArrowRight,
   CheckCircle2,
   ChevronLeft,
@@ -245,19 +244,22 @@ export const LoginPage: React.FC<Props> = ({ onLoginSuccess, revocationMessage }
       <div className="w-full max-w-md relative z-10 animate-float">
         {/* Brand Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 shadow-[0_0_25px_rgba(16,185,129,0.2)] mb-3 backdrop-blur-xl">
-            <Activity className="w-7 h-7 text-emerald-400" />
+          <div className="inline-block p-2.5 rounded-2xl bg-[#07110d]/95 border border-emerald-500/35 shadow-[0_0_35px_rgba(16,185,129,0.25)] backdrop-blur-xl mb-3 transition-transform hover:scale-[1.02] duration-300">
+            <img
+              src="/rorr-banner.png"
+              alt="RORR — System Error Intelligence"
+              className="h-16 sm:h-20 w-auto object-contain mx-auto rounded-xl"
+            />
           </div>
 
-          <h1 className="text-3xl font-extrabold text-white tracking-wider flex items-center justify-center gap-2 drop-shadow-md">
-            <span>RORR</span>
-            <span className="text-xs px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 font-mono font-bold border border-emerald-500/30 uppercase tracking-widest">
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              Enterprise Access Governance &amp; Telemetry
+            </span>
+            <span className="text-[10px] font-mono font-bold text-zinc-400 border border-zinc-800 px-2 py-0.5 rounded-full bg-zinc-900/80">
               v1.2.0
             </span>
-          </h1>
-          <p className="text-xs text-zinc-300 font-mono mt-1 max-w-xs mx-auto drop-shadow-sm">
-            System Error Intelligence, Low-Overhead Telemetry &amp; Access Governance
-          </p>
+          </div>
         </div>
 
         {/* Revocation Warning Alert if evicted */}

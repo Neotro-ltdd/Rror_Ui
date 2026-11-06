@@ -50,8 +50,12 @@ export const Sidebar: React.FC<Props> = ({ isOpen, onClose, activeTab, onTabChan
       <aside className="fixed left-0 top-16 bottom-0 z-50 w-72 border-r border-[#27272a] bg-[#121215] flex flex-col justify-between py-5 select-none shadow-2xl animate-in slide-in-from-left duration-200">
         <div className="space-y-2 px-4">
           <div className="pb-3 mb-2 border-b border-[#27272a] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/rorr-icon.png"
+                alt="RORR"
+                className="w-5 h-5 rounded-md object-contain shadow-[0_0_8px_rgba(16,185,129,0.3)] shrink-0"
+              />
               <span className="text-xs font-mono font-bold uppercase tracking-widest text-zinc-300">
                 Navigation Deck
               </span>
@@ -113,8 +117,8 @@ export const Sidebar: React.FC<Props> = ({ isOpen, onClose, activeTab, onTabChan
           )}
 
           <div className="px-4 py-2.5 bg-[#09090b] rounded-xl border border-[#27272a] text-center">
-            <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider">Rorr Diagnostics Hub</p>
-            <p className="text-[9px] text-zinc-400 font-mono mt-0.5">System SRS v1.1.0 Ready</p>
+            <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider">RORR System Error Intelligence</p>
+            <p className="text-[9px] text-zinc-400 font-mono mt-0.5">Enterprise Edition • v1.2.0</p>
           </div>
         </div>
       </aside>

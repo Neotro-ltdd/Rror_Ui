@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, LogOut, PanelLeft, Radio, Search } from 'lucide-react';
+import { LogOut, PanelLeft, Radio, Search } from 'lucide-react';
 import type { Project, User } from '../types/rorr';
 
 interface Props {
@@ -50,17 +50,19 @@ export const Navbar: React.FC<Props> = ({
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-            <Activity className="w-4 h-4" />
-          </div>
+          <img
+            src="/rorr-icon.png"
+            alt="RORR Logo"
+            className="w-8 h-8 rounded-lg object-contain drop-shadow-[0_0_12px_rgba(31,214,138,0.35)] shrink-0"
+          />
           <div className="hidden sm:block">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-base text-white tracking-wide">RORR</span>
-              <span className="text-[10px] uppercase font-mono font-semibold tracking-wider px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
-                v1.1
+              <span className="font-extrabold text-base text-white tracking-wider font-sans">RORR</span>
+              <span className="text-[10px] uppercase font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                v1.2
               </span>
             </div>
-            <p className="text-[10px] text-zinc-400 font-mono">Error Intelligence Hub</p>
+            <p className="text-[9px] text-zinc-400 font-mono tracking-widest uppercase">System Error Intelligence</p>
           </div>
         </div>
 
