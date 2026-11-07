@@ -5,13 +5,22 @@ import type { LogStats } from '../types/rorr';
 interface Props {
   stats: LogStats | null;
   selectedProject: string;
+  onRefresh?: () => void;
 }
 
-export const MetricsCharts: React.FC<Props> = ({ stats, selectedProject }) => {
+export const MetricsCharts: React.FC<Props> = ({ stats, selectedProject, onRefresh }) => {
   if (!stats) {
     return (
-      <div className="p-12 text-center text-zinc-400 font-mono text-xs">
-        [SYS_MONITOR] Querying real-time telemetry metrics...
+      <div className="p-12 text-center text-zinc-400 font-mono text-xs space-y-3">
+        <p className="animate-pulse">[SYS_MONITOR] Querying real-time telemetry metrics...</p>
+        {onRefresh && (
+          <button
+            onClick={onRefresh}
+            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-emerald-400 border border-zinc-700 text-[11px] transition cursor-pointer"
+          >
+            ↻ Retry Telemetry Sync
+          </button>
+        )}
       </div>
     );
   }

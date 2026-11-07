@@ -1,7 +1,12 @@
 import axios from 'axios';
 import type { AiExplanationResponse, ApiResponse, LogStats, PaginatedResult, PermissionCategoryGroup, Project, ProjectMember, RoleDetail, RoleItem, RorrLog, User, UserRole } from '../types/rorr';
 
-const BACKEND_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+// When deployed on Vercel (https://rrorline.vercel.app), prioritize the same-origin relative reverse proxy (/api/v1)
+// to eliminate CORS cross-origin restrictions, preflight latency, and adblocker net::ERR_FAILED interference.
+const isVercelHost = typeof window !== 'undefined' && window.location.hostname.includes('vercel.app');
+const BACKEND_BASE = isVercelHost 
+  ? '' 
+  : (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const API_BASE = `${BACKEND_BASE}/api/v1`;
 
 export const api = axios.create({
@@ -41,7 +46,30 @@ export const onSessionRevoked = (callback: SessionRevokedCallback) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    // Automatic fallback: If a request directly to the remote backend fails with a Network Error (CORS block, adblocker, net::ERR_FAILED),
+    // transparently retry via the same-origin reverse proxy (/api/v1/...).
+    const originalRequest = error.config;
+    if (
+      (!error.response || error.code === 'ERR_NETWORK') &&
+      originalRequest &&
+      !originalRequest._retry &&
+      typeof window !== 'undefined' &&
+      originalRequest.baseURL &&
+      originalRequest.baseURL.startsWith('http')
+    ) {
+      originalRequest._retry = true;
+      try {
+        const fallbackConfig = {
+          ...originalRequest,
+          baseURL: '/api/v1',
+        };
+        return await axios(fallbackConfig);
+      } catch (fallbackErr) {
+        return Promise.reject(fallbackErr);
+      }
+    }
+
     if (error.response) {
       const status = error.response.status;
       const url = error.config?.url || '';

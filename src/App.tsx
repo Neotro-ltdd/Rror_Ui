@@ -264,7 +264,9 @@ export function App() {
             />
           )}
 
-          {activeTab === 'metrics' && <MetricsCharts stats={stats} selectedProject={selectedProject} />}
+          {activeTab === 'metrics' && (
+            <MetricsCharts stats={stats} selectedProject={selectedProject} onRefresh={fetchMetrics} />
+          )}
 
           {activeTab === 'simulator' && (
             <PayloadSimulator
